@@ -9,20 +9,12 @@
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            last_directory=$(basename ${{ runner.workspace }})
-            cd $HOME/www/
-            git clone https://github.com/${{ github.repository }}.git
-            if [ -d "./symfony" ]; then
-              rsync -r ./$last_directory/ ./symfony
-              rm -rf ./$last_directory
-              cd ./symfony
-              # Clear Symfony cache
-              php bin/console cache:clear
-              # Apply database migrations
-              php bin/console doctrine:migrations:migrate --no-interaction
-            else
-              echo "The target directory 'symfony' does not exist on your server."
-              exit 1
+            cd $HOME/www/symfony/
+            git fetch --all
+            git reset --hard origin/main
+            php bin/console cache:clear --env=prod
+            php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+
 
   Deploy:
     needs: Setup
