@@ -1,4 +1,4 @@
-name: Continuous Deployment to Alwaysdata with Symfony 7.0.4
+name: Continuous Deployment to Alwaysdata with Symfony 7.0.4 
 
 on:
   push:
