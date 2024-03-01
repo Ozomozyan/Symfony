@@ -9,7 +9,7 @@
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd $HOME/esat/www/symfony/
+            cd $HOME/www/symfony/
             git fetch --all
             git reset --hard origin/main
             php bin/console cache:clear --env=prod
