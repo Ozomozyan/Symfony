@@ -1,19 +1,29 @@
-name: Continuous Deployment to Alwaysdata with Symfony
-
-on:
-  push:
-jobs:
-  Setup:
+  Deploy:
+    needs: Setup
     runs-on: ubuntu-latest
     steps:
-      - name: Setup SSH Connection
+      - name: SSH Connection for Deployment
         uses: appleboy/ssh-action@master
         with:
           host: "ssh-${{ secrets.USERNAME }}.alwaysdata.net"
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
+            last_directory=$(basename ${{ runner.workspace }})
             cd $HOME/www/
+            git clone https://github.com/${{ github.repository }}.git
+            if [ -d "./symfony" ]; then
+              rsync -r ./$last_directory/ ./symfony
+              rm -rf ./$last_directory
+              cd ./symfony
+              # Clear Symfony cache
+              php bin/console cache:clear
+              # Apply database migrations
+              php bin/console doctrine:migrations:migrate --no-interaction
+            else
+              echo "The target directory 'symfony' does not exist on your server."
+              exit 1
+
   Deploy:
     needs: Setup
     runs-on: ubuntu-latest
