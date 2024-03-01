@@ -15,32 +15,6 @@
             php bin/console cache:clear --env=prod
             php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 
-
-  Deploy:
-    needs: Setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: SSH Connection for Deployment
-        uses: appleboy/ssh-action@master
-        with:
-          host: "ssh-${{ secrets.USERNAME }}.alwaysdata.net"
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          script: |
-            last_directory=$(basename ${{ runner.workspace }})
-            cd $HOME/www/
-            git clone https://github.com/${{ github.repository }}.git
-            # Checking if the Symfony project directory exists
-            if [ -d "./symfony" ]; then
-              rsync -r ./$last_directory/ ./symfony
-              rm -rf ./$last_directory
-              # Symfony specific commands for cache clear and possible migrations
-              cd ./symfony
-              php bin/console cache:clear
-              php bin/console doctrine:migrations:migrate --no-interaction
-            else
-              echo "The target directory 'symfony' does not exist on your server."
-              exit 1
   Restart:
     needs: Deploy
     runs-on: ubuntu-latest
