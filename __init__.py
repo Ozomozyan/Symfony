@@ -13,6 +13,6 @@ class HelloWorldController
     public function index(): Response
     {
         // You can use a template here if you prefer.
-        return new Response('<h2>Hello World !</h2>');
+        return new Response('<h2>Hello World !</h2>'); #comm
     }
 }
