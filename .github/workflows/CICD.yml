@@ -1,10 +1,12 @@
-name: Industrialisation continue sur le serveur Alwaysdata
-on: push
+name: Continuous Deployment to Alwaysdata with Symfony
+
+on:
+  push:
 jobs:
-  Connexion:
+  Setup:
     runs-on: ubuntu-latest
     steps:
-      - name: Connexion SSH avec le serveur
+      - name: Setup SSH Connection
         uses: appleboy/ssh-action@master
         with:
           host: "ssh-${{ secrets.USERNAME }}.alwaysdata.net"
@@ -12,11 +14,11 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           script: |
             cd $HOME/www/
-  Copy:
-    needs: Connexion
+  Deploy:
+    needs: Setup
     runs-on: ubuntu-latest
     steps:
-      - name: Connexion SSH avec le serveur
+      - name: SSH Connection for Deployment
         uses: appleboy/ssh-action@master
         with:
           host: "ssh-${{ secrets.USERNAME }}.alwaysdata.net"
@@ -26,31 +28,32 @@ jobs:
             last_directory=$(basename ${{ runner.workspace }})
             cd $HOME/www/
             git clone https://github.com/${{ github.repository }}.git
-            # Vérifier si le répertoire de destination existe
-            if [ "$(ls -A ./flask)" ]; then
-              rsync -r ./$last_directory/ ./flask
+            # Checking if the Symfony project directory exists
+            if [ -d "./symfony" ]; then
+              rsync -r ./$last_directory/ ./symfony
               rm -rf ./$last_directory
+              # Symfony specific commands for cache clear and possible migrations
+              cd ./symfony
+              php bin/console cache:clear
+              php bin/console doctrine:migrations:migrate --no-interaction
             else
-              echo "Le répertoire flask de destination sur votre serveur n'existe pas"
+              echo "The target directory 'symfony' does not exist on your server."
               exit 1
-            fi
   Restart:
-    needs: Copy
+    needs: Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Restart Alwaysdata site
         run: |
           response_code=$(curl -s -o /dev/null -w "%{http_code}" -X POST --basic --user "${{ secrets.ALWAYSDATA_TOKEN }}:" https://api.alwaysdata.com/v1/site/${{ secrets.ALWAYSDATA_SITE_ID }}/restart/)
-          # Vérifier le code de réponse HTTP
           if [ "$response_code" -eq 204 ]; then
-            echo "Relance de votre site réussi"
+            echo "Site restart successful"
           elif [ "$response_code" -eq 404 ]; then
-            echo "Vous n'avez pas renseigner correctement votre secret ALWAYSDATA_SITE_ID"
-            exit 1  # Quitter avec un code d'erreur
+            echo "The ALWAYSDATA_SITE_ID secret is incorrect"
+            exit 1
           elif [ "$response_code" -eq 401 ]; then
-            echo "Vous n'avez pas renseigner correctement votre secret ALWAYSDATA_TOKEN"
-          exit 1  # Quitter avec un code d'erreur
+            echo "The ALWAYSDATA_TOKEN secret is incorrect"
+            exit 1
           else
-            echo "Échec du redémarrage avec le code de réponse : $response_code"
-            exit 1  # Quitter avec un code d'erreur
-          fi
+            echo "Restart failed with response code: $response_code"
+            exit 1
