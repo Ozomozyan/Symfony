@@ -1,3 +1,20 @@
+name: Continuous Deployment to Alwaysdata with Symfony 7.0.4
+
+on:
+  push:
+jobs:
+  Setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH Connection
+        uses: appleboy/ssh-action@master
+        with:
+          host: "ssh-${{ secrets.USERNAME }}.alwaysdata.net"
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            echo "SSH connection setup complete."
+
   Deploy:
     needs: Setup
     runs-on: ubuntu-latest
@@ -9,11 +26,18 @@
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd $HOME/www/symfony/
+            # Navigate to the Symfony project directory
+            cd /home/esat/www/symfony/
+            # Ensure the directory is clean and reset to match the repository
             git fetch --all
             git reset --hard origin/main
+            # Install Composer dependencies (Assuming composer.json is present)
+            composer install --no-dev --optimize-autoloader
+            # Clear Symfony cache
             php bin/console cache:clear --env=prod
+            # Apply database migrations
             php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+            echo "Deployment to Symfony project directory complete."
 
   Restart:
     needs: Deploy
@@ -23,13 +47,13 @@
         run: |
           response_code=$(curl -s -o /dev/null -w "%{http_code}" -X POST --basic --user "${{ secrets.ALWAYSDATA_TOKEN }}:" https://api.alwaysdata.com/v1/site/${{ secrets.ALWAYSDATA_SITE_ID }}/restart/)
           if [ "$response_code" -eq 204 ]; then
-            echo "Site restart successful"
+            echo "Site restart successful."
           elif [ "$response_code" -eq 404 ]; then
-            echo "The ALWAYSDATA_SITE_ID secret is incorrect"
+            echo "The ALWAYSDATA_SITE_ID secret is incorrect."
             exit 1
           elif [ "$response_code" -eq 401 ]; then
-            echo "The ALWAYSDATA_TOKEN secret is incorrect"
+            echo "The ALWAYSDATA_TOKEN secret is incorrect."
             exit 1
           else
-            echo "Restart failed with response code: $response_code"
+            echo "Restart failed with response code: $response_code."
             exit 1
