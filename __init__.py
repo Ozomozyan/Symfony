@@ -12,7 +12,6 @@ class HelloWorldController
      */
     public function index(): Response
     {
-        // You can use a template here if you prefer.
-        return new Response('<h2>Hello World !</h2>'); #comm
+        return new Response('<h2>Hello World from Symfony 7.0.4!</h2>');
     }
 }
