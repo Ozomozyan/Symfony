@@ -1,15 +1,18 @@
-from flask import Flask, render_template_string, render_template, jsonify
-from flask import render_template
-from flask import json
-from datetime import datetime
-from urllib.request import urlopen
-import sqlite3
-                                                                                                                                       
-app = Flask(__name__)                                                                                                                  
-                                                                                                                                       
-@app.route('/')
-def hello_world():
-    return <h2>Hellow World !</h2> #Commit
-  
-if __name__ == "__main__":
-  app.run(debug=True)
+// src/Controller/HelloWorldController.php
+
+namespace App\Controller;
+
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+class HelloWorldController
+{
+    /**
+     * @Route("/", name="hello_world")
+     */
+    public function index(): Response
+    {
+        // You can use a template here if you prefer.
+        return new Response('<h2>Hello World !</h2>');
+    }
+}
