@@ -13,8 +13,14 @@ def get_db_connection():
     return conn
 
 @app.route('/')
-def home():
-    return 'Hello, welcome to our crisis management system!'
+def hello_world():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM sectors')
+    sectors = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return jsonify(sectors)
 
 if __name__ == '__main__':
     app.run(debug=True)
