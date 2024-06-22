@@ -11,7 +11,14 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd $HOME/www/
+            # Ensure the target directory exists
+            if [ ! -d "$HOME/www/esat1" ]; then
+              mkdir -p $HOME/www/esat1
+            fi
+            cd $HOME/www/esat1
+            # Cleanup the existing contents if needed
+            rm -rf *
+
   Copy:
     needs: Connexion
     runs-on: ubuntu-latest
@@ -23,17 +30,16 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            last_directory=$(basename ${{ runner.workspace }})
-            cd $HOME/www/
-            git clone https://github.com/${{ github.repository }}.git
-            # Vérifier si le répertoire de destination existe
-            if [ "$(ls -A ./flask)" ]; then
-              rsync -r ./$last_directory/ ./flask
-              rm -rf ./$last_directory
+            cd $HOME/www/esat1
+            # Clone or pull from the repository
+            if [ -d "./.git" ]; then
+              # Repository exists, just pull the latest changes
+              git pull
             else
-              echo "Le répertoire flask de destination sur votre serveur n'existe pas"
-              exit 1
+              # Repository does not exist, clone it
+              git clone https://github.com/${{ github.repository }} .
             fi
+
   Restart:
     needs: Copy
     runs-on: ubuntu-latest
@@ -41,16 +47,16 @@ jobs:
       - name: Restart Alwaysdata site
         run: |
           response_code=$(curl -s -o /dev/null -w "%{http_code}" -X POST --basic --user "${{ secrets.ALWAYSDATA_TOKEN }}:" https://api.alwaysdata.com/v1/site/${{ secrets.ALWAYSDATA_SITE_ID }}/restart/)
-          # Vérifier le code de réponse HTTP
+          # Check HTTP response code
           if [ "$response_code" -eq 204 ]; then
-            echo "Relance de votre site réussi"
+            echo "Site restart successful"
           elif [ "$response_code" -eq 404 ]; then
-            echo "Vous n'avez pas renseigner correctement votre secret ALWAYSDATA_SITE_ID"
-            exit 1  # Quitter avec un code d'erreur
+            echo "ALWAYSDATA_SITE_ID not correctly set"
+            exit 1  # Exit with error code
           elif [ "$response_code" -eq 401 ]; then
-            echo "Vous n'avez pas renseigner correctement votre secret ALWAYSDATA_TOKEN"
-          exit 1  # Quitter avec un code d'erreur
+            echo "ALWAYSDATA_TOKEN not correctly set"
+            exit 1  # Exit with error code
           else
-            echo "Échec du redémarrage avec le code de réponse : $response_code"
-            exit 1  # Quitter avec un code d'erreur
+            echo "Site restart failed with response code: $response_code"
+            exit 1  # Exit with error code
           fi
