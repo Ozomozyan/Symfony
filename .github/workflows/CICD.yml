@@ -11,7 +11,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd $HOME/www/esat
+            cd $HOME/www/
   Copy:
     needs: Connexion
     runs-on: ubuntu-latest
