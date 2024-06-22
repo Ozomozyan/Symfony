@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 import mysql.connector
+from mysql.connector import errorcode
 
 app = Flask(__name__)
 
@@ -11,6 +12,14 @@ def get_db_connection():
         password='C>3Gmt-4_2h3Fp)/'
     )
     return conn
+except mysql.connector.Error as err:
+    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        print("Something is wrong with your user name or password")
+    elif err.errno == errorcode.ER_BAD_DB_ERROR:
+        print("Database does not exist")
+    else:
+        print(err)
+    return None
 
 @app.route('/')
 def hello_world():
