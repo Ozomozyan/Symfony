@@ -1,43 +1,56 @@
 name: Industrialisation continue sur le serveur Alwaysdata
 on: push
 jobs:
-  Prepare-and-Sync:
+  Connexion:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3  # This action checks out your repository under $GITHUB_WORKSPACE
-
-      - name: Setup SSH and Sync files
+      - name: Connexion SSH avec le serveur
         uses: appleboy/ssh-action@master
         with:
           host: "ssh-${{ secrets.USERNAME }}.alwaysdata.net"
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            # Ensure the target directory exists
-            if [ ! -d "$HOME/www/esat1" ]; then
-              echo "The target directory does not exist"
-              exit 1  # Exit if target directory does not exist
+            cd $HOME/www/
+  Copy:
+    needs: Connexion
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connexion SSH avec le serveur
+        uses: appleboy/ssh-action@master
+        with:
+          host: "ssh-${{ secrets.USERNAME }}.alwaysdata.net"
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            last_directory=$(basename ${{ runner.workspace }})
+            cd $HOME/www/
+            git clone https://github.com/${{ github.repository }}.git
+            # Vérifier si le répertoire de destination existe
+            if [ "$(ls -A ./flask)" ]; then
+              rsync -r ./$last_directory/ ./flask
+              rm -rf ./$last_directory
+            else
+              echo "Le répertoire flask de destination sur votre serveur n'existe pas"
+              exit 1
             fi
-
-            # Sync repository files to the target directory
-            rsync -avz --delete $GITHUB_WORKSPACE/ $HOME/www/esat1/
-
   Restart:
-    needs: Prepare-and-Sync
+    needs: Copy
     runs-on: ubuntu-latest
     steps:
       - name: Restart Alwaysdata site
         run: |
           response_code=$(curl -s -o /dev/null -w "%{http_code}" -X POST --basic --user "${{ secrets.ALWAYSDATA_TOKEN }}:" https://api.alwaysdata.com/v1/site/${{ secrets.ALWAYSDATA_SITE_ID }}/restart/)
+          # Vérifier le code de réponse HTTP
           if [ "$response_code" -eq 204 ]; then
-            echo "Site restart successful"
+            echo "Relance de votre site réussi"
           elif [ "$response_code" -eq 404 ]; then
-            echo "ALWAYSDATA_SITE_ID not correctly set"
-            exit 1  # Exit with error code
+            echo "Vous n'avez pas renseigner correctement votre secret ALWAYSDATA_SITE_ID"
+            exit 1  # Quitter avec un code d'erreur
           elif [ "$response_code" -eq 401 ]; then
-            echo "ALWAYSDATA_TOKEN not correctly set"
-            exit 1  # Exit with error code
+            echo "Vous n'avez pas renseigner correctement votre secret ALWAYSDATA_TOKEN"
+          exit 1  # Quitter avec un code d'erreur
           else
-            echo "Site restart failed with response code: $response_code"
-            exit 1  # Exit with error code
+            echo "Échec du redémarrage avec le code de réponse : $response_code"
+            exit 1  # Quitter avec un code d'erreur
+          fi
