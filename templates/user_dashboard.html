@@ -1,0 +1,23 @@
+<html>
+<body>
+    <h1>User Dashboard</h1>
+    <p>Welcome, {{ user }}!</p>
+    <h2>Report Your Status</h2>
+    <form method="post" action="/update_status">
+        <label for="health_status">Your Health Status:</label>
+        <input type="text" id="health_status" name="health_status"><br><br>
+        <input type="submit" value="Update Status">
+    </form>
+    <h2>Report an Incident</h2>
+    <form method="post" action="/report_incident">
+        <label for="description">Description:</label>
+        <textarea id="description" name="description"></textarea><br><br>
+        <label for="requires">Requires:</label>
+        <select id="requires" name="requires">
+            <option value="doctor">Doctor</option>
+            <option value="security">Security</option>
+        </select><br><br>
+        <input type="submit" value="Report Incident">
+    </form>
+</body>
+</html>
