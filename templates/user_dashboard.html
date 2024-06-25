@@ -15,7 +15,7 @@
         <label for="sector">Sector:</label>
         <select id="sector" name="sector">
             {% for sector in sectors %}
-                <option value="{{ sector.id }}">{{ sector.name }}</option>
+                <option value="{{ sector[0] }}">{{ sector[1] }} - ID: {{ sector[0] }}</option>
             {% endfor %}
         </select><br><br>
         <label for="incident_type">Incident Type:</label>
