@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, render_template, request, make_response
+from flask import Flask, jsonify, render_template, request, make_response, session
 from flask_httpauth import HTTPBasicAuth
 import mysql.connector
+import bcrypt
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
@@ -147,14 +148,14 @@ def admin_dashboard():
     conn.close()
     return render_template('admin_dashboard.html', user=auth.current_user(), incidents=incidents, resources=resources)
 
+# In the registration route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
-        password = request.form['password']
-        # Here you should add password hashing for security
-        hashed_password = password  # Placeholder for hashing
-        
+        password = request.form['password'].encode('utf-8')
+        hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
+
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('INSERT INTO personnel (name, role, password) VALUES (%s, %s, %s)', (username, 'user', hashed_password))
@@ -164,11 +165,12 @@ def register():
         return "Registration successful"
     return render_template('register.html')
 
+# Modify the login function to set up the session
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
-        password = request.form['password']
+        password = request.form['password'].encode('utf-8')
 
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -177,13 +179,12 @@ def login():
         cursor.close()
         conn.close()
 
-        if user_pass and user_pass[0] == password:  # Simple comparison, use hashed passwords in production
-            # Log the user in (set up session or token)
+        if user_pass and bcrypt.checkpw(password, user_pass[0].encode('utf-8')):
+            session['username'] = username  # Store username in session
             return "Login successful"
         else:
             return "Invalid username or password"
     return render_template('login.html')
 
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, ssl_context='adhoc')  # Flask will generate a self-signed certificate
