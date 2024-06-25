@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, make_response, session, redirect, url_for
+from flask import Flask, jsonify, render_template, request, make_response, session, redirect, url_for, flash
 from flask_httpauth import HTTPBasicAuth
 import mysql.connector
 import bcrypt
@@ -168,32 +168,40 @@ def admin_dashboard():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    conn = get_db_connection()
+    cursor = conn.cursor()
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password'].encode('utf-8')
-        sector_id = request.form['sector']
-        hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
+        try:
+            username = request.form['username']
+            password = request.form['password'].encode('utf-8')
+            sector_id = request.form['sector']
+            hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
 
-        # Set up the default role
-        default_role = 'user'  # You can change 'user' to whatever role is considered a normal user
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        # Insert into personnel
-        cursor.execute('INSERT INTO personnel (name, role, password) VALUES (%s, %s, %s)', (username, default_role, hashed_password))
-        # Insert into individuals
-        cursor.execute('INSERT INTO individuals (name, sector_id, health_status, is_quarantined) VALUES (%s, %s, "healthy", FALSE)', (username, sector_id))
-        conn.commit()
-        cursor.close()
-        conn.close()
-        return "Registration successful"
+            # Insert into personnel
+            cursor.execute('INSERT INTO personnel (name, role, password) VALUES (%s, %s, %s)', (username, 'user', hashed_password))
+            # Insert into individuals
+            cursor.execute('INSERT INTO individuals (name, sector_id, health_status, is_quarantined) VALUES (%s, %s, "healthy", FALSE)', (username, sector_id))
+            conn.commit()
+            flash('Registration successful')
+            return redirect(url_for('login'))
+        except mysql.connector.Error as e:
+            conn.rollback()
+            flash(f"Database error: {e}")
+            print(f"Database error: {e}")  # Optional: Log this error to a file or error monitoring service
+            return redirect(url_for('register'))
+        finally:
+            cursor.close()
+            conn.close()
     else:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT id, name FROM sectors')
-        sectors = cursor.fetchall()
-        cursor.close()
-        conn.close()
+        try:
+            cursor.execute('SELECT id, name FROM sectors')
+            sectors = cursor.fetchall()
+        except mysql.connector.Error as e:
+            flash(f"Database error: {e}")
+            sectors = []
+        finally:
+            cursor.close()
+            conn.close()
         return render_template('register.html', sectors=sectors)
 
 
