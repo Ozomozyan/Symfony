@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask import render_template
-
+import mysql.connector
 
 app = Flask(__name__)
 
@@ -27,5 +27,5 @@ def hello_world():
     conn.close()
     return jsonify(sectors)
 
-if __name__ == "__main__":                                                                                                                                             
+if __name__ == '__main__':                                                                                                                                             
   app.run(debug=True)
