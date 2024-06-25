@@ -5,7 +5,11 @@
     <h2>Report Your Status</h2>
     <form method="post" action="/update_status">
         <label for="health_status">Your Health Status:</label>
-        <input type="text" id="health_status" name="health_status"><br><br>
+        <select id="health_status" name="health_status">
+            <option value="healthy">Healthy</option>
+            <option value="sick">Sick</option>
+            <option value="critical">Critical</option>
+        </select><br><br>
         <input type="submit" value="Update Status">
     </form>
     <h2>Report an Incident</h2>
