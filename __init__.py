@@ -81,10 +81,22 @@ def sectors():
 def dashboard():
     if 'username' in session:
         username = session['username']
-        # Example to demonstrate use of role in selecting a dashboard
-        # Fetch role from database and then render accordingly
-        return render_template(f'{username}_dashboard.html', username=username)
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT role FROM personnel WHERE name = %s', (username,))
+        role_info = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if role_info:
+            role = role_info[0]
+            # Fetch any role-specific data if needed here
+            template_name = f"{role}_dashboard.html"
+            return render_template(template_name, username=username)
+        else:
+            return "Role information not found", 404
     return redirect(url_for('login'))
+
 
 
 @app.route('/report_incident', methods=['POST'])
@@ -156,14 +168,19 @@ def register():
         password = request.form['password'].encode('utf-8')
         hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
 
+        # Set up the default role
+        default_role = 'user'  # You can change 'user' to whatever role is considered a normal user
+
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO personnel (name, role, password) VALUES (%s, %s, %s)', (username, 'user', hashed_password))
+        # Ensure that the role is included in the insert command
+        cursor.execute('INSERT INTO personnel (name, role, password) VALUES (%s, %s, %s)', (username, default_role, hashed_password))
         conn.commit()
         cursor.close()
         conn.close()
         return "Registration successful"
     return render_template('register.html')
+
 
 
 # Modify the login function to set up the session
