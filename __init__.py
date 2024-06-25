@@ -173,10 +173,9 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password'].encode('utf-8')
-        sector_id = request.form['sector']
-        print("Registering user:", username, "with sector ID:", sector_id)  # Debug output
+        sector_id = int(request.form['sector'])  # Convert sector_id to integer
         hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
-        
+
         try:
             cursor.execute('INSERT INTO personnel (name, role, password) VALUES (%s, %s, %s)', (username, 'user', hashed_password))
             cursor.execute('INSERT INTO individuals (name, sector_id, health_status, is_quarantined) VALUES (%s, %s, "healthy", FALSE)', (username, sector_id))
@@ -184,8 +183,8 @@ def register():
             return "Registration successful"
         except mysql.connector.Error as e:
             conn.rollback()
-            print("Error during registration:", str(e))  # Debug output
-            return f"Failed to register due to error: {str(e)}", 500
+            print(f"Failed to insert data: {e}")  # Debug output
+            return f"Failed to register due to error: {e}", 500
         finally:
             cursor.close()
             conn.close()
