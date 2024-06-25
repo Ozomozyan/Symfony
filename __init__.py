@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, make_response, session
+from flask import Flask, jsonify, render_template, request, make_response, session, redirect, url_for
 from flask_httpauth import HTTPBasicAuth
 import mysql.connector
 import bcrypt
@@ -78,20 +78,13 @@ def sectors():
         return jsonify({"error": "Database connection failed"}), 500
     
 @app.route('/dashboard')
-@auth.login_required
 def dashboard():
-    role = users[auth.current_user()]['role']
-    incidents = None
-    if role in ['doctor', 'security']:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM incidents WHERE incident_type = %s', (role,))
-        incidents = cursor.fetchall()
-        cursor.close()
-        conn.close()
-
-    template_name = f"{role}_dashboard.html"
-    return render_template(template_name, user=auth.current_user(), incidents=incidents)
+    if 'username' in session:
+        username = session['username']
+        # Example to demonstrate use of role in selecting a dashboard
+        # Fetch role from database and then render accordingly
+        return render_template(f'{username}_dashboard.html', username=username)
+    return redirect(url_for('login'))
 
 
 @app.route('/report_incident', methods=['POST'])
