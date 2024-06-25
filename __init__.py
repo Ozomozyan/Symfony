@@ -133,6 +133,56 @@ def update_status():
     conn.close()
     return "Health status updated successfully"
 
+@app.route('/admin_dashboard')
+@auth.login_required
+@role_required('admin')
+def admin_dashboard():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM incidents')
+    incidents = cursor.fetchall()
+    cursor.execute('SELECT * FROM resources')
+    resources = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('admin_dashboard.html', user=auth.current_user(), incidents=incidents, resources=resources)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        # Here you should add password hashing for security
+        hashed_password = password  # Placeholder for hashing
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO personnel (name, role, password) VALUES (%s, %s, %s)', (username, 'user', hashed_password))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return "Registration successful"
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT password FROM personnel WHERE name = %s', (username,))
+        user_pass = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if user_pass and user_pass[0] == password:  # Simple comparison, use hashed passwords in production
+            # Log the user in (set up session or token)
+            return "Login successful"
+        else:
+            return "Invalid username or password"
+    return render_template('login.html')
 
 
 if __name__ == "__main__":

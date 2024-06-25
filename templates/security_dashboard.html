@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Doctor Dashboard</title>
+    <title>Security Dashboard</title>
 </head>
 <body>
-    <h1>Doctor Dashboard</h1>
+    <h1>Security Dashboard</h1>
     <p>Welcome, {{ user }}!</p>
-    <h2>Assigned Medical Incidents</h2>
+    <h2>Security Alerts</h2>
     <ul>
         {% for incident in incidents %}
-            <li>{{ incident.description }} - Requires: Doctor - Status: {{ incident.status }}</li>
+            <li>{{ incident.description }} - Requires: Security - Status: {{ incident.status }}</li>
         {% endfor %}
     </ul>
 </body>
