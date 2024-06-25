@@ -16,9 +16,16 @@ users = {
 
 @auth.verify_password
 def verify_password(username, password):
-    user = users.get(username)
-    if user and user['password'] == password:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT password, role FROM personnel WHERE name = %s', (username,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if user and bcrypt.checkpw(password.encode('utf-8'), user[0].encode('utf-8')):
+        users[username] = {"password": user[0], "role": user[1]}  # Update the users dict dynamically
         return username
+
     
 from functools import wraps
 
