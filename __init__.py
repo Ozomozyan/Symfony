@@ -33,13 +33,6 @@ def role_required(role):
     return decorator
 
 
-@app.route('/dashboard')
-@auth.login_required
-def dashboard():
-    user_role = users[auth.current_user()]['role']
-    template_name = f"{user_role}_dashboard.html"
-    return render_template(template_name, user=auth.current_user())
-
 
 def get_db_connection():
     try:
