@@ -171,38 +171,31 @@ def register():
     conn = get_db_connection()
     cursor = conn.cursor()
     if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password'].encode('utf-8')
+        sector_id = request.form['sector']
+        print("Registering user:", username, "with sector ID:", sector_id)  # Debug output
+        hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
+        
         try:
-            username = request.form['username']
-            password = request.form['password'].encode('utf-8')
-            sector_id = request.form['sector']
-            hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
-
-            # Insert into personnel
             cursor.execute('INSERT INTO personnel (name, role, password) VALUES (%s, %s, %s)', (username, 'user', hashed_password))
-            # Insert into individuals
             cursor.execute('INSERT INTO individuals (name, sector_id, health_status, is_quarantined) VALUES (%s, %s, "healthy", FALSE)', (username, sector_id))
             conn.commit()
-            flash('Registration successful')
-            return redirect(url_for('login'))
+            return "Registration successful"
         except mysql.connector.Error as e:
             conn.rollback()
-            flash(f"Database error: {e}")
-            print(f"Database error: {e}")  # Optional: Log this error to a file or error monitoring service
-            return redirect(url_for('register'))
+            print("Error during registration:", str(e))  # Debug output
+            return f"Failed to register due to error: {str(e)}", 500
         finally:
             cursor.close()
             conn.close()
     else:
-        try:
-            cursor.execute('SELECT id, name FROM sectors')
-            sectors = cursor.fetchall()
-        except mysql.connector.Error as e:
-            flash(f"Database error: {e}")
-            sectors = []
-        finally:
-            cursor.close()
-            conn.close()
+        cursor.execute('SELECT id, name FROM sectors')
+        sectors = cursor.fetchall()
+        cursor.close()
+        conn.close()
         return render_template('register.html', sectors=sectors)
+
 
 
 

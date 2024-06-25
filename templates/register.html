@@ -15,7 +15,7 @@
         <label for="sector">Sector:</label>
         <select id="sector" name="sector">
             {% for sector in sectors %}
-                <option value="{{ sector.id }}">{{ sector.name }}</option>
+                <option value="{{ sector.id }}">{{ sector.name }} - {{ sector.id }}</option>
             {% endfor %}
         </select>        
         <input type="submit" value="Register">
