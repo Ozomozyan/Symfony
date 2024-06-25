@@ -198,6 +198,7 @@ def register():
 
 
 
+
 # Modify the login function to set up the session
 @app.route('/login', methods=['GET', 'POST'])
 def login():
