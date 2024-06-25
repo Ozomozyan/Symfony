@@ -10,13 +10,13 @@
     <h2>Current Incidents</h2>
     <ul>
         {% for incident in incidents %}
-            <li>{{ incident.description }} - Status: {{ incident.status }}</li>
+            <li>{{ incident[2] }} - Status: {{ incident[6] }}</li>
         {% endfor %}
     </ul>
     <h2>Resources</h2>
     <ul>
         {% for resource in resources %}
-            <li>{{ resource.type }}: {{ resource.quantity }}</li>
+            <li>{{ resource[1] }}: {{ resource[2] }}</li>
         {% endfor %}
     </ul>
 </body>

@@ -157,14 +157,29 @@ def update_status():
 @role_required('admin')
 def admin_dashboard():
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM incidents')
-    incidents = cursor.fetchall()
-    cursor.execute('SELECT * FROM resources')
-    resources = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return render_template('admin_dashboard.html', user=auth.current_user(), incidents=incidents, resources=resources)
+    if conn is not None:
+        cursor = conn.cursor()
+        try:
+            cursor.execute('SELECT * FROM incidents')
+            incidents = cursor.fetchall()
+            cursor.execute('SELECT * FROM resources')
+            resources = cursor.fetchall()
+
+            # Debug: Print the fetched data to the console
+            print("Incidents:", incidents)
+            print("Resources:", resources)
+
+            cursor.close()
+        except mysql.connector.Error as err:
+            print("Failed to fetch data:", err)
+            return jsonify({"error": "Database query failed"}), 500
+        finally:
+            conn.close()
+        
+        return render_template('admin_dashboard.html', user=session['username'], incidents=incidents, resources=resources)
+    else:
+        return jsonify({"error": "Failed to connect to database"}), 500
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
