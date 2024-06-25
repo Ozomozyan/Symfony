@@ -5,6 +5,7 @@ import bcrypt
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
+app.secret_key = "=%p#UHtG?89|9/v.Ab46E1aDRuEI}B"
 
 users = {
     "admin": {"password": "adminpass", "role": "admin"},
