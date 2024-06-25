@@ -85,17 +85,21 @@ def dashboard():
         cursor = conn.cursor()
         cursor.execute('SELECT role FROM personnel WHERE name = %s', (username,))
         role_info = cursor.fetchone()
+        
+        cursor.execute('SELECT * FROM sectors')
+        sectors = cursor.fetchall()
+
         cursor.close()
         conn.close()
         
         if role_info:
             role = role_info[0]
-            # Fetch any role-specific data if needed here
             template_name = f"{role}_dashboard.html"
-            return render_template(template_name, username=username)
+            return render_template(template_name, username=username, sectors=sectors)
         else:
             return "Role information not found", 404
     return redirect(url_for('login'))
+
 
 
 
@@ -103,19 +107,20 @@ def dashboard():
 @auth.login_required
 def report_incident():
     description = request.form['description']
-    requires = request.form['requires']
-    # Assuming 'sector_id' needs to be provided or determined in some way
-    sector_id = 1  # Placeholder value
+    sector_id = request.form['sector']
+    incident_type = request.form['incident_type']
+    requires = ','.join(request.form.getlist('requires'))  # Handle multiple selections
 
     conn = get_db_connection()
     cursor = conn.cursor()
     query = '''INSERT INTO incidents (sector_id, description, incident_type, start_time, status)
-               VALUES (%s, %s, %s, NOW(), 'pending')'''
-    cursor.execute(query, (sector_id, description, requires))
+               VALUES (%s, %s, %s, NOW(), 'ongoing')'''
+    cursor.execute(query, (sector_id, description, incident_type))
     conn.commit()
     cursor.close()
     conn.close()
     return "Incident reported successfully"
+
 
 
 @app.route('/update_resource/<int:resource_id>', methods=['PUT'])
@@ -166,6 +171,7 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password'].encode('utf-8')
+        sector_id = request.form['sector']
         hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
 
         # Set up the default role
@@ -173,13 +179,22 @@ def register():
 
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Ensure that the role is included in the insert command
+        # Insert into personnel
         cursor.execute('INSERT INTO personnel (name, role, password) VALUES (%s, %s, %s)', (username, default_role, hashed_password))
+        # Insert into individuals
+        cursor.execute('INSERT INTO individuals (name, sector_id, health_status, is_quarantined) VALUES (%s, %s, "healthy", FALSE)', (username, sector_id))
         conn.commit()
         cursor.close()
         conn.close()
         return "Registration successful"
-    return render_template('register.html')
+    else:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, name FROM sectors')
+        sectors = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return render_template('register.html', sectors=sectors)
 
 
 
