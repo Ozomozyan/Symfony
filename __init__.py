@@ -148,7 +148,6 @@ def admin_dashboard():
     conn.close()
     return render_template('admin_dashboard.html', user=auth.current_user(), incidents=incidents, resources=resources)
 
-# In the registration route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -164,6 +163,7 @@ def register():
         conn.close()
         return "Registration successful"
     return render_template('register.html')
+
 
 # Modify the login function to set up the session
 @app.route('/login', methods=['GET', 'POST'])
