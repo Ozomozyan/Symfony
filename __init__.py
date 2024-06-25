@@ -8,7 +8,7 @@ def get_db_connection():
         conn = mysql.connector.connect(
             host='mysql-esat.alwaysdata.net',  # Adjust the host name
             database='esat_crisis',
-            user='esat',
+            user='esat_2',
             password='C>3Gmt-4_2h3Fp)/'
         )
         return conn
