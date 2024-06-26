@@ -85,24 +85,26 @@ def dashboard():
         cursor = conn.cursor()
         cursor.execute('SELECT role FROM personnel WHERE name = %s', (username,))
         role_info = cursor.fetchone()
-
-        # Fetch incidents based on the user's role
-        if role_info[0] in ['doctor', 'security']:
-            incident_type_filter = "WHERE incident_type LIKE '%" + role_info[0] + "%'"
-        else:
-            incident_type_filter = ""
         
-        cursor.execute('SELECT * FROM incidents ' + incident_type_filter)
-        incidents = cursor.fetchall()
-
+        if role_info:
+            role = role_info[0]
+            incident_type_filter = ""
+            if role in ['doctor', 'security']:  # Fetch relevant incidents for doctors and security
+                incident_type_filter = "WHERE incident_type LIKE '%" + role + "%'"
+            cursor.execute('SELECT * FROM incidents ' + incident_type_filter)
+            incidents = cursor.fetchall()
+        else:
+            cursor.close()
+            conn.close()
+            return "Role information not found", 404
+        
         cursor.close()
         conn.close()
         
-        template_name = f"{role_info[0]}_dashboard.html"
-        return render_template(template_name, username=username, incidents=incidents)
+        template_name = f"{role}_dashboard.html"
+        return render_template(template_name, username=username, role=role, incidents=incidents)
     else:
         return redirect(url_for('login'))
-
 
 
 
