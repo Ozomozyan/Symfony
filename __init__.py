@@ -80,7 +80,6 @@ def sectors():
 @app.route('/dashboard')
 def dashboard():
     if 'username' in session:
-        title = session['title']
         username = session['username']
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -107,7 +106,7 @@ def dashboard():
         conn.close()
 
         template_name = f"{role}_dashboard.html"
-        return render_template(template_name, username=username, role=role, incidents=incidents, sectors=sectors, title=title)
+        return render_template(template_name, username=username, role=role, incidents=incidents, sectors=sectors)
     else:
         return redirect(url_for('login'))
 
