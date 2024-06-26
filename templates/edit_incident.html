@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Incident</title>
+</head>
+<body>
+    <h1>Edit Incident</h1>
+    <form method="post">
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" value="{{ incident[2] }}"><br><br>
+        <label for="incident_type">Incident Type:</label>
+        <select id="incident_type" name="incident_type">
+            <option value="epidemic" {% if incident[3] == 'epidemic' %}selected{% endif %}>Epidemic</option>
+            <option value="zombie attack" {% if incident[3] == 'zombie attack' %}selected{% endif %}>Zombie Attack</option>
+        </select><br><br>
+        <label for="status">Status:</label>
+        <select id="status" name="status">
+            <option value="ongoing" {% if incident[6] == 'ongoing' %}selected{% endif %}>Ongoing</option>
+            <option value="resolved" {% if incident[6] == 'resolved' %}selected{% endif %}>Resolved</option>
+        </select><br><br>
+        <input type="submit" value="Save Changes">
+    </form>
+</body>
+</html>

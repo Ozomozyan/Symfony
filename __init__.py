@@ -222,6 +222,51 @@ def edit_individual(individual_id):
     conn.close()
     return render_template('edit_individual.html', individual=individual)
 
+@app.route('/admin/edit_resource/<int:resource_id>', methods=['GET', 'POST'])
+@auth.login_required
+@role_required('admin')
+def edit_resource(resource_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        resource_type = request.form['type']
+        quantity = request.form['quantity']
+        sector_id = request.form['sector_id']
+        cursor.execute('UPDATE resources SET type = %s, quantity = %s, sector_id = %s WHERE id = %s', 
+                       (resource_type, quantity, sector_id, resource_id))
+        conn.commit()
+        return redirect(url_for('admin_dashboard'))
+
+    cursor.execute('SELECT * FROM resources WHERE id = %s', (resource_id,))
+    resource = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return render_template('edit_resource.html', resource=resource)
+
+@app.route('/admin/edit_incident/<int:incident_id>', methods=['GET', 'POST'])
+@auth.login_required
+@role_required('admin')
+def edit_incident(incident_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        description = request.form['description']
+        incident_type = request.form['incident_type']
+        status = request.form['status']
+        cursor.execute('UPDATE incidents SET description = %s, incident_type = %s, status = %s WHERE id = %s', 
+                       (description, incident_type, status, incident_id))
+        conn.commit()
+        return redirect(url_for('admin_dashboard'))
+
+    cursor.execute('SELECT * FROM incidents WHERE id = %s', (incident_id,))
+    incident = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return render_template('edit_incident.html', incident=incident)
+
+
 
 @app.route('/admin/add_resource', methods=['GET', 'POST'])
 @auth.login_required
