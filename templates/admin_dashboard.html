@@ -19,14 +19,14 @@
     <h2>Current Incidents</h2>
     <ul>
         {% for incident in incidents %}
-            <li>{{ incident.description }} - Status: {{ incident.status }} - <a href="/admin/edit_incident/{{ incident.id }}">Edit</a></li>
+            <li>{{ incident[2] }} - Status: {{ incident[6] }} - <a href="/admin/edit_incident/{{ incident[0] }}">Edit</a></li>
         {% endfor %}
     </ul>
 
     <h2>Resources</h2>
     <ul>
         {% for resource in resources %}
-            <li>{{ resource.type }}: {{ resource.quantity }} - <a href="/admin/edit_resource/{{ resource.id }}">Edit</a></li>
+            <li>{{ resource[1] }}: {{ resource[2] }} - <a href="/admin/edit_resource/{{ resource[0] }}">Edit</a></li>
         {% endfor %}
     </ul>
 </body>
