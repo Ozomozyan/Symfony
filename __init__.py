@@ -370,7 +370,7 @@ def risk_assessment():
     
     # Fetch the count of epidemic incidents per sector
     cursor.execute('''
-        SELECT sector_id, name, COUNT(*) as count
+        SELECT sector_id, COUNT(*) as count
         FROM incidents
         WHERE incident_type = 'epidemic'
         GROUP BY name
