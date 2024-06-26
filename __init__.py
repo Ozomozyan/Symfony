@@ -170,14 +170,19 @@ def update_status():
 @role_required('admin')
 def admin_dashboard():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute('SELECT * FROM incidents')
-    incidents = cursor.fetchall()
-    cursor.execute('SELECT * FROM resources')
-    resources = cursor.fetchall()
-    cursor.close()
+    cursor_dict = conn.cursor(dictionary=True)
+    cursor_dict.execute('SELECT * FROM incidents')
+    incidents = cursor_dict.fetchall()
+    
+    cursor_tuple = conn.cursor()
+    cursor_tuple.execute('SELECT * FROM resources')
+    resources = cursor_tuple.fetchall()
+    
+    cursor_dict.close()
+    cursor_tuple.close()
     conn.close()
     return render_template('admin_dashboard.html', user=auth.current_user(), incidents=incidents, resources=resources)
+
 
 @app.route('/admin/users')
 @auth.login_required
