@@ -285,31 +285,6 @@ def add_resource():
         return redirect(url_for('admin_dashboard'))
     return render_template('add_resource.html')
 
-@app.route('/admin/incidents')
-@auth.login_required
-@role_required('admin')
-def manage_incidents():
-    # Fetch incidents from the database
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM incidents')
-    incidents = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return render_template('manage_incidents.html', incidents=incidents)
-
-@app.route('/admin/resources')
-@auth.login_required
-@role_required('admin')
-def manage_resources():
-    # Fetch resources from the database
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM resources')
-    resources = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return render_template('manage_resources.html', resources=resources)
 
 
 @app.route('/register', methods=['GET', 'POST'])
