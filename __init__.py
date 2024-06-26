@@ -264,7 +264,7 @@ def edit_incident(incident_id):
     user_role = users.get(username, {}).get('role')
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(dictionary=True)  # Ensuring dictionary mode for easier access
     cursor.execute('SELECT * FROM incidents WHERE id = %s', (incident_id,))
     incident = cursor.fetchone()
 
@@ -273,14 +273,10 @@ def edit_incident(incident_id):
         conn.close()
         return "Incident not found", 404
 
-    # Fetch the role_required and split it into a list
+    # Split the role_required and verify if user role is suitable for editing
     required_roles = incident['role_required'].split(',') if incident['role_required'] else []
 
-    # Debug: Output the roles to see what's being parsed
-    print(f"Required roles for this incident: {required_roles}")
-    print(f"User's role: {user_role}")
-
-    # Check if the user's role matches any of the required roles, or if the user is an admin
+    # Admin check: Allow admin to edit regardless of role_required
     if user_role != 'admin' and user_role not in required_roles:
         cursor.close()
         conn.close()
@@ -289,7 +285,7 @@ def edit_incident(incident_id):
     if request.method == 'POST':
         description = request.form['description']
         incident_type = request.form['incident_type']
-        role_required = ','.join(request.form.getlist('role_required'))
+        role_required = ','.join(request.form.getlist('role_required'))  # Update role requirements if needed
         status = request.form['status']
 
         cursor.execute('UPDATE incidents SET description = %s, incident_type = %s, role_required = %s, status = %s WHERE id = %s',
@@ -302,7 +298,6 @@ def edit_incident(incident_id):
     cursor.close()
     conn.close()
     return render_template('edit_incident.html', incident=incident)
-
 
 
 
