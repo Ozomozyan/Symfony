@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Risk Assessment Dashboard</title>
+</head>
+<body>
+    <h1>Risk Assessment Dashboard</h1>
+    <h2>Epidemic Risks</h2>
+    <table border="1">
+        <tr>
+            <th>Sector ID</th>
+            <th>Number of Incidents</th>
+        </tr>
+        {% for risk in epidemic_risks %}
+        <tr>
+            <td>{{ risk.sector_id }}</td>
+            <td>{{ risk.count }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Zombie Attack Risks</h2>
+    <table border="1">
+        <tr>
+            <th>Sector ID</th>
+            <th>Number of Incidents</th>
+        </tr>
+        {% for risk in zombie_risks %}
+        <tr>
+            <td>{{ risk.sector_id }}</td>
+            <td>{{ risk.count }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

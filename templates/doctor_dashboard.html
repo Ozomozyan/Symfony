@@ -8,6 +8,10 @@
     <h1>{{ role|default('User') }} Dashboard</h1>
     <p>Welcome, {{ username|default('Guest') }}!</p>
     
+    <div>
+        <button onclick="window.location.href='/risk_assessment'">Risk Assessment</button>
+    </div>
+
     <h2>Relevant Incidents</h2>
     <ul>
         {% for incident in incidents %}

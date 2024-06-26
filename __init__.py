@@ -355,6 +355,37 @@ def register():
         return render_template('register.html', sectors=sectors)
 
 
+@app.route('/risk_assessment')
+@auth.login_required
+@role_required('doctor')
+def risk_assessment():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    # Fetch the count of epidemic incidents per sector
+    cursor.execute('''
+        SELECT sector_id, COUNT(*) as count
+        FROM incidents
+        WHERE incident_type = 'epidemic'
+        GROUP BY sector_id
+        ORDER BY count DESC
+    ''')
+    epidemic_risks = cursor.fetchall()
+    
+    # Fetch the count of zombie attack incidents per sector
+    cursor.execute('''
+        SELECT sector_id, COUNT(*) as count
+        FROM incidents
+        WHERE incident_type = 'zombie attack'
+        GROUP BY sector_id
+        ORDER BY count DESC
+    ''')
+    zombie_risks = cursor.fetchall()
+    
+    cursor.close()
+    conn.close()
+    
+    return render_template('risk_assessment.html', epidemic_risks=epidemic_risks, zombie_risks=zombie_risks)
 
 
 
