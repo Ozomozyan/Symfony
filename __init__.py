@@ -273,9 +273,14 @@ def edit_incident(incident_id):
         conn.close()
         return "Incident not found", 404
 
-    # Split the roles and check if the user's role is in the list of required roles
-    required_roles = incident[3].split(',') if incident[3] else []  # Assuming index 3 is role_required
+    # Fetch the role_required and split it into a list
+    required_roles = incident['role_required'].split(',') if incident['role_required'] else []
 
+    # Debug: Output the roles to see what's being parsed
+    print(f"Required roles for this incident: {required_roles}")
+    print(f"User's role: {user_role}")
+
+    # Check if the user's role matches any of the required roles, or if the user is an admin
     if user_role != 'admin' and user_role not in required_roles:
         cursor.close()
         conn.close()
@@ -297,6 +302,7 @@ def edit_incident(incident_id):
     cursor.close()
     conn.close()
     return render_template('edit_incident.html', incident=incident)
+
 
 
 
