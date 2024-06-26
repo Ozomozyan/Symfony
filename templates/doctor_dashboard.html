@@ -11,7 +11,13 @@
     <h2>Relevant Incidents</h2>
     <ul>
         {% for incident in incidents %}
-            <li>{{ incident.description }} - Status: {{ incident.status }} - <a href="/edit_incident/{{ incident.id }}">Edit</a></li>
+            <li>
+                Incident Description: {{ incident.description }}<br>
+                Sector: {{ incident.sector_id }} - ID: {{ incident.id }}<br>
+                Type: {{ incident.incident_type }}<br>
+                Status: {{ incident.status }}<br>
+                <a href="/edit_incident/{{ incident.id }}">Edit Incident</a>
+            </li>
         {% endfor %}
     </ul>
 </body>

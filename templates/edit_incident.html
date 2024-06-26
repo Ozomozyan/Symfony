@@ -8,17 +8,26 @@
     <h1>Edit Incident</h1>
     <form method="post">
         <label for="description">Description:</label>
-        <input type="text" id="description" name="description" value="{{ incident[2] }}"><br><br>
+        <input type="text" id="description" name="description" value="{{ incident.description }}"><br><br>
+        
         <label for="incident_type">Incident Type:</label>
         <select id="incident_type" name="incident_type">
-            <option value="epidemic" {% if incident[3] == 'epidemic' %}selected{% endif %}>Epidemic</option>
-            <option value="zombie attack" {% if incident[3] == 'zombie attack' %}selected{% endif %}>Zombie Attack</option>
+            <option value="epidemic" {% if incident.incident_type == 'epidemic' %}selected{% endif %}>Epidemic</option>
+            <option value="zombie attack" {% if incident.incident_type == 'zombie attack' %}selected{% endif %}>Zombie Attack</option>
         </select><br><br>
+
+        <label for="role_required">Role Required:</label>
+        <select id="role_required" name="role_required" multiple>
+            <option value="doctor" {% if 'doctor' in incident.role_required.split(',') %}selected{% endif %}>Doctor</option>
+            <option value="security" {% if 'security' in incident.role_required.split(',') %}selected{% endif %}>Security</option>
+        </select><br><br>
+
         <label for="status">Status:</label>
         <select id="status" name="status">
-            <option value="ongoing" {% if incident[6] == 'ongoing' %}selected{% endif %}>Ongoing</option>
-            <option value="resolved" {% if incident[6] == 'resolved' %}selected{% endif %}>Resolved</option>
+            <option value="ongoing" {% if incident.status == 'ongoing' %}selected{% endif %}>Ongoing</option>
+            <option value="resolved" {% if incident.status == 'resolved' %}selected{% endif %}>Resolved</option>
         </select><br><br>
+
         <input type="submit" value="Save Changes">
     </form>
 </body>

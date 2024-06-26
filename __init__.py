@@ -268,14 +268,14 @@ def edit_incident(incident_id):
     cursor.execute('SELECT * FROM incidents WHERE id = %s', (incident_id,))
     incident = cursor.fetchone()
 
-    # Ensure the cursor and connection are properly closed
     if not incident:
         cursor.close()
         conn.close()
         return "Incident not found", 404
 
     # Check if the user is allowed to edit this incident
-    if user_role != 'admin' and user_role not in incident[3]:  # Assuming incident_type is at index 3
+    # `role_required` should be checked here instead of `incident_type`
+    if user_role != 'admin' and (not incident[3] or user_role not in incident[3].split(',')):
         cursor.close()
         conn.close()
         return "Access Denied", 403
@@ -284,8 +284,10 @@ def edit_incident(incident_id):
         description = request.form['description']
         incident_type = request.form['incident_type']
         status = request.form['status']
-        cursor.execute('UPDATE incidents SET description = %s, incident_type = %s, status = %s WHERE id = %s',
-                       (description, incident_type, status, incident_id))
+        role_required = request.form['role_required']  # Handling multiple roles as a comma-separated string
+
+        cursor.execute('UPDATE incidents SET description = %s, incident_type = %s, role_required = %s, status = %s WHERE id = %s',
+                       (description, incident_type, role_required, status, incident_id))
         conn.commit()
         cursor.close()
         conn.close()
