@@ -92,13 +92,12 @@ def dashboard():
             return "Role information not found", 404
 
         role = role_info[0]
-        # Select incidents relevant to the role of doctor or security, if applicable
-        incident_type_filter = ""
+        # Fetch incidents that require the logged-in user's role
         if role in ['doctor', 'security']:
-            incident_type_filter = f"WHERE incident_type LIKE '%{role}%'"
-        
-        cursor.execute(f'SELECT * FROM incidents {incident_type_filter}')
-        incidents = cursor.fetchall()
+            cursor.execute('SELECT * FROM incidents WHERE FIND_IN_SET(%s, requires)', (role,))
+            incidents = cursor.fetchall()
+        else:
+            incidents = []
 
         cursor.close()
         conn.close()

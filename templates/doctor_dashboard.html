@@ -2,17 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ role|default('User') }} Dashboard</title>
+    <title>{{ role.capitalize() }} Dashboard</title>
 </head>
 <body>
-    <h1>{{ role|default('User') }} Dashboard</h1>
-    <p>Welcome, {{ username|default('Guest') }}!</p>
+    <h1>{{ role.capitalize() }} Dashboard</h1>
+    <p>Welcome, {{ username }}</p>
     
-    <h2>Relevant Incidents</h2>
-    <ul>
-        {% for incident in incidents %}
-            <li>{{ incident.description }} - Status: {{ incident.status }} - <a href="/edit_incident/{{ incident.id }}">Edit</a></li>
-        {% endfor %}
-    </ul>
+    <h2>Assigned Incidents</h2>
+    {% if incidents %}
+        <ul>
+            {% for incident in incidents %}
+                <li>{{ incident.description }} - Status: {{ incident.status }} - <a href="/edit_incident/{{ incident.id }}">Edit</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No incidents requiring your attention at the moment.</p>
+    {% endif %}
 </body>
 </html>
