@@ -170,7 +170,7 @@ def update_status():
 @role_required('admin')
 def admin_dashboard():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute('SELECT * FROM incidents')
     incidents = cursor.fetchall()
     cursor.execute('SELECT * FROM resources')
