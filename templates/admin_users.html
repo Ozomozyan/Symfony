@@ -6,16 +6,23 @@
 </head>
 <body>
     <h1>Users Administration</h1>
+    
+    <!-- Navigation Back to Dashboard -->
+    <div>
+        <button onclick="window.location.href='/admin_dashboard'">Back to Dashboard</button>
+    </div>
+
     <h2>Personnel</h2>
     <ul>
         {% for person in personnel %}
-        <li>{{ person.name }} - {{ person.role }} - <a href="/admin/edit_user/{{ person.id }}">Edit</a></li>
+            <li>{{ person[1] }} - {{ person[3] }} - <a href="/admin/edit_user/{{ person[0] }}">Edit</a></li>
         {% endfor %}
     </ul>
+    
     <h2>Individuals</h2>
     <ul>
         {% for individual in individuals %}
-        <li>{{ individual.name }} - {{ individual.health_status }} - <a href="/admin/edit_individual/{{ individual.id }}">Edit</a></li>
+            <li>{{ individual[1] }} - {{ individual[3] }} - <a href="/admin/edit_individual/{{ individual[0] }}">Edit</a></li>
         {% endfor %}
     </ul>
 </body>
