@@ -1,7 +1,13 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard</title>
+</head>
 <body>
     <h1>User Dashboard</h1>
     <p>Welcome, {{ username }}!</p>
+    
     <h2>Report Your Status</h2>
     <form method="post" action="/update_status">
         <label for="health_status">Your Health Status:</label>
@@ -12,6 +18,7 @@
         </select><br><br>
         <input type="submit" value="Update Status">
     </form>
+
     <h2>Report an Incident</h2>
     <form method="post" action="/report_incident">
         <label for="description">Description:</label>

@@ -85,20 +85,16 @@ def dashboard():
         cursor = conn.cursor()
         cursor.execute('SELECT role FROM personnel WHERE name = %s', (username,))
         role_info = cursor.fetchone()
-
-        if not role_info:
+        
+        if role_info:
+            role = role_info[0]
+            cursor.execute('SELECT * FROM incidents WHERE FIND_IN_SET(%s, role_required)', (role,))
+            incidents = cursor.fetchall()
+        else:
             cursor.close()
             conn.close()
             return "Role information not found", 404
-
-        role = role_info[0]
-        # Fetch incidents that require the logged-in user's role
-        if role in ['doctor', 'security']:
-            cursor.execute('SELECT * FROM incidents WHERE FIND_IN_SET(%s, requires)', (role,))
-            incidents = cursor.fetchall()
-        else:
-            incidents = []
-
+        
         cursor.close()
         conn.close()
         
@@ -121,13 +117,17 @@ def report_incident():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    query = '''INSERT INTO incidents (sector_id, description, incident_type, start_time, status)
-               VALUES (%s, %s, %s, NOW(), 'ongoing')'''
-    cursor.execute(query, (sector_id, description, incident_type))
+    # Adding 'role_required' to store roles needed for the incident
+    query = '''
+    INSERT INTO incidents (sector_id, description, incident_type, role_required, start_time, status)
+    VALUES (%s, %s, %s, %s, NOW(), 'ongoing')
+    '''
+    cursor.execute(query, (sector_id, description, incident_type, requires))
     conn.commit()
     cursor.close()
     conn.close()
     return "Incident reported successfully"
+
 
 
 
