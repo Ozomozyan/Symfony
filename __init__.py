@@ -269,7 +269,7 @@ def edit_incident(incident_id):
     user_role = users.get(username, {}).get('role')
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(dictionary=True)  # Set cursor to return dictionary
     cursor.execute('SELECT * FROM incidents WHERE id = %s', (incident_id,))
     incident = cursor.fetchone()
 
@@ -278,10 +278,10 @@ def edit_incident(incident_id):
         conn.close()
         return "Incident not found", 404
 
+    # Access role_required using dictionary key
     required_roles = incident['role_required'].split(',') if incident['role_required'] else []
 
-    # Ensure that admins can edit any incident and that specific roles can only edit their required incidents
-    if user_role != 'admin' and not any(role in required_roles for role in user_role.split(',')):
+    if user_role != 'admin' and user_role not in required_roles:
         cursor.close()
         conn.close()
         return "Access Denied", 403
@@ -302,6 +302,7 @@ def edit_incident(incident_id):
     cursor.close()
     conn.close()
     return render_template('edit_incident.html', incident=incident)
+
 
 
 
