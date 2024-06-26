@@ -33,5 +33,11 @@
             <li>{{ resource[1] }}: {{ resource[2] }} - <a href="/admin/edit_resource/{{ resource[0] }}">Edit</a></li>
         {% endfor %}
     </ul>
+
+        <!-- Logout Button -->
+    <form action="{{ url_for('logout') }}" method="post">
+        <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+
 </body>
 </html>

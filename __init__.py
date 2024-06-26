@@ -379,5 +379,12 @@ def login():
             return "Invalid username or password"
     return render_template('login.html')
 
+@app.route('/logout')
+def logout():
+    # Remove the username from the session if it's there
+    session.pop('username', None)
+    return redirect(url_for('login'))
+
+
 if __name__ == "__main__":
     app.run(debug=True, ssl_context='adhoc')  # Flask will generate a self-signed certificate
