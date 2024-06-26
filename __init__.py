@@ -331,13 +331,14 @@ def register():
     conn = get_db_connection()
     cursor = conn.cursor()
     if request.method == 'POST':
+        title = request.form['title']
         username = request.form['username']
         password = request.form['password'].encode('utf-8')
         sector_id = int(request.form['sector'])  # Convert sector_id to integer
         hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
 
         try:
-            cursor.execute('INSERT INTO personnel (name, role, password) VALUES (%s, %s, %s)', (username, 'user', hashed_password))
+            cursor.execute('INSERT INTO personnel (title, name, role, password) VALUES (%s, %s, %s, %s)', (title, username, 'user', hashed_password))
             cursor.execute('INSERT INTO individuals (name, sector_id, health_status, is_quarantined) VALUES (%s, %s, "healthy", FALSE)', (username, sector_id))
             conn.commit()
             return "Registration successful"
