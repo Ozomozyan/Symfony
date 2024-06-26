@@ -83,18 +83,12 @@ def dashboard():
         username = session['username']
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        # Fetch user role information
         cursor.execute('SELECT role FROM personnel WHERE name = %s', (username,))
         role_info = cursor.fetchone()
 
-        # Fetch sectors information
-        cursor.execute('SELECT id, name FROM sectors')
-        sectors = cursor.fetchall()
-        
         if role_info:
             role = role_info[0]
-            # Filter incidents based on the roles required
+            # Assuming role_required includes the roles separated by commas
             cursor.execute('SELECT * FROM incidents WHERE FIND_IN_SET(%s, role_required)', (role,))
             incidents = cursor.fetchall()
         else:
@@ -104,11 +98,12 @@ def dashboard():
         
         cursor.close()
         conn.close()
-
+        
         template_name = f"{role}_dashboard.html"
-        return render_template(template_name, username=username, role=role, incidents=incidents, sectors=sectors)
+        return render_template(template_name, username=username, role=role, incidents=incidents)
     else:
         return redirect(url_for('login'))
+
 
 
 
