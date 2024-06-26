@@ -82,30 +82,33 @@ def dashboard():
     if 'username' in session:
         username = session['username']
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)  # Fetching data as dictionaries for easier access in templates
-
+        cursor = conn.cursor(dictionary=True)
+        
         # Fetch user role information
         cursor.execute('SELECT role FROM personnel WHERE name = %s', (username,))
         role_info = cursor.fetchone()
 
+        # Fetch sectors information
+        cursor.execute('SELECT id, name FROM sectors')
+        sectors = cursor.fetchall()
+        
         if role_info:
-            role = role_info['role']  # Access as a dictionary
-            # Filter incidents based on the roles required using the correct column name
+            role = role_info[0]
+            # Filter incidents based on the roles required
             cursor.execute('SELECT * FROM incidents WHERE FIND_IN_SET(%s, role_required)', (role,))
             incidents = cursor.fetchall()
         else:
             cursor.close()
             conn.close()
             return "Role information not found", 404
-
+        
         cursor.close()
         conn.close()
 
         template_name = f"{role}_dashboard.html"
-        return render_template(template_name, username=username, role=role, incidents=incidents)
+        return render_template(template_name, username=username, role=role, incidents=incidents, sectors=sectors)
     else:
         return redirect(url_for('login'))
-
 
 
 
