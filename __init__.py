@@ -2,6 +2,7 @@ from flask import Flask, jsonify, render_template, request, make_response, sessi
 from flask_httpauth import HTTPBasicAuth
 import mysql.connector
 import bcrypt
+from datetime import datetime
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
@@ -387,6 +388,34 @@ def risk_assessment():
     
     return render_template('risk_assessment.html', epidemic_risks=epidemic_risks, zombie_risks=zombie_risks)
 
+
+
+@app.route('/epidemic_by_date', methods=['GET', 'POST'])
+@auth.login_required
+@role_required('doctor')
+def epidemic_by_date():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    epidemics = []
+
+    if request.method == 'POST':
+        date_input = request.form.get('date')
+        date = datetime.strptime(date_input, '%Y-%m-%d').date()  # Ensuring the date format is correct
+
+        # Fetch the count of epidemic incidents per sector that started on the selected date
+        cursor.execute('''
+            SELECT sector_id, COUNT(*) as count
+            FROM incidents
+            WHERE incident_type = 'epidemic' AND DATE(start_time) = %s
+            GROUP BY sector_id
+            ORDER BY count DESC
+        ''', (date,))
+        epidemics = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('epidemic_by_date.html', epidemics=epidemics)
 
 
 # Modify the login function to set up the session

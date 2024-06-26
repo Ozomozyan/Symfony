@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Epidemic Analysis by Date</title>
+</head>
+<body>
+    <h1>Epidemic Analysis by Date</h1>
+    <form method="post">
+        <label for="date">Select Date:</label>
+        <input type="date" id="date" name="date">
+        <input type="submit" value="Show Data">
+    </form>
+
+    {% if epidemics %}
+    <h2>Incidents on {{ request.form.date }}</h2>
+    <table border="1">
+        <tr>
+            <th>Sector ID</th>
+            <th>Number of Epidemic Incidents</th>
+        </tr>
+        {% for epidemic in epidemics %}
+        <tr>
+            <td>{{ epidemic.sector_id }}</td>
+            <td>{{ epidemic.count }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</body>
+</html>
