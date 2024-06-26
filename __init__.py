@@ -264,7 +264,7 @@ def edit_incident(incident_id):
     user_role = users.get(username, {}).get('role')
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(dictionary=True)  # Ensuring we're using dictionary cursor
     cursor.execute('SELECT * FROM incidents WHERE id = %s', (incident_id,))
     incident = cursor.fetchone()
 
@@ -273,14 +273,19 @@ def edit_incident(incident_id):
         conn.close()
         return "Incident not found", 404
 
+    # Fetch the role_required and split it into a list
     required_roles = incident['role_required'].split(',') if incident['role_required'] else []
 
-    if request.method == 'POST':
-        if user_role != 'admin' and user_role not in required_roles:
-            cursor.close()
-            conn.close()
-            return "Access Denied", 403
+    print(f"Required roles for this incident: {required_roles}")
+    print(f"User's role: {user_role}")
 
+    # Admins should always be able to edit incidents, regardless of role_required
+    if user_role != 'admin' and user_role not in required_roles:
+        cursor.close()
+        conn.close()
+        return "Access Denied", 403
+
+    if request.method == 'POST':
         description = request.form['description']
         incident_type = request.form['incident_type']
         role_required = ','.join(request.form.getlist('role_required'))
@@ -293,16 +298,9 @@ def edit_incident(incident_id):
         conn.close()
         return redirect(url_for('dashboard'))
 
-    else:
-        if user_role != 'admin' and user_role not in required_roles:
-            cursor.close()
-            conn.close()
-            return "Access Denied", 403
-
     cursor.close()
     conn.close()
     return render_template('edit_incident.html', incident=incident)
-
 
 
 
