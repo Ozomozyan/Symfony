@@ -264,7 +264,7 @@ def edit_incident(incident_id):
     user_role = users.get(username, {}).get('role')
 
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     cursor.execute('SELECT * FROM incidents WHERE id = %s', (incident_id,))
     incident = cursor.fetchone()
 
