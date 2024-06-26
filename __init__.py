@@ -93,8 +93,8 @@ def dashboard():
         sectors = cursor.fetchall()
         
         if role_info:
-            role = role_info[0]
-            # Filter incidents based on the roles required
+            role = role_info['role']  # Access as a dictionary
+            # Filter incidents based on the roles required using the correct column name
             cursor.execute('SELECT * FROM incidents WHERE FIND_IN_SET(%s, role_required)', (role,))
             incidents = cursor.fetchall()
         else:
