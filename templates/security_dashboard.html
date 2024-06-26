@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Security Dashboard</title>
+    <title>{{ role.capitalize() }} Dashboard</title>
 </head>
 <body>
-    <h1>Security Dashboard</h1>
-    <p>Welcome, {{ user }}!</p>
-    <h2>Security Alerts</h2>
+    <h1>{{ role.capitalize() }} Dashboard</h1>
+    <p>Welcome, {{ username }}!</p>
+    
+    <h2>Relevant Incidents</h2>
     <ul>
         {% for incident in incidents %}
-            <li>{{ incident.description }} - Requires: Security - Status: {{ incident.status }}</li>
+            <li>{{ incident.description }} - Status: {{ incident.status }} - <a href="/edit_incident/{{ incident.id }}">Edit</a></li>
         {% endfor %}
     </ul>
 </body>

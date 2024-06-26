@@ -85,20 +85,24 @@ def dashboard():
         cursor = conn.cursor()
         cursor.execute('SELECT role FROM personnel WHERE name = %s', (username,))
         role_info = cursor.fetchone()
+
+        # Fetch incidents based on the user's role
+        if role_info[0] in ['doctor', 'security']:
+            incident_type_filter = "WHERE incident_type LIKE '%" + role_info[0] + "%'"
+        else:
+            incident_type_filter = ""
         
-        cursor.execute('SELECT * FROM sectors')
-        sectors = cursor.fetchall()
+        cursor.execute('SELECT * FROM incidents ' + incident_type_filter)
+        incidents = cursor.fetchall()
 
         cursor.close()
         conn.close()
         
-        if role_info:
-            role = role_info[0]
-            template_name = f"{role}_dashboard.html"
-            return render_template(template_name, username=username, sectors=sectors)
-        else:
-            return "Role information not found", 404
-    return redirect(url_for('login'))
+        template_name = f"{role_info[0]}_dashboard.html"
+        return render_template(template_name, username=username, incidents=incidents)
+    else:
+        return redirect(url_for('login'))
+
 
 
 
@@ -244,27 +248,44 @@ def edit_resource(resource_id):
     conn.close()
     return render_template('edit_resource.html', resource=resource)
 
-@app.route('/admin/edit_incident/<int:incident_id>', methods=['GET', 'POST'])
+@app.route('/edit_incident/<int:incident_id>', methods=['GET', 'POST'])
 @auth.login_required
-@role_required('admin')
 def edit_incident(incident_id):
+    username = session.get('username')
+    user_role = users.get(username, {}).get('role')
+
     conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute('SELECT * FROM incidents WHERE id = %s', (incident_id,))
+    incident = cursor.fetchone()
+
+    # Ensure the cursor and connection are properly closed
+    if not incident:
+        cursor.close()
+        conn.close()
+        return "Incident not found", 404
+
+    # Check if the user is allowed to edit this incident
+    if user_role != 'admin' and user_role not in incident[3]:  # Assuming incident_type is at index 3
+        cursor.close()
+        conn.close()
+        return "Access Denied", 403
 
     if request.method == 'POST':
         description = request.form['description']
         incident_type = request.form['incident_type']
         status = request.form['status']
-        cursor.execute('UPDATE incidents SET description = %s, incident_type = %s, status = %s WHERE id = %s', 
+        cursor.execute('UPDATE incidents SET description = %s, incident_type = %s, status = %s WHERE id = %s',
                        (description, incident_type, status, incident_id))
         conn.commit()
-        return redirect(url_for('admin_dashboard'))
+        cursor.close()
+        conn.close()
+        return redirect(url_for('dashboard'))
 
-    cursor.execute('SELECT * FROM incidents WHERE id = %s', (incident_id,))
-    incident = cursor.fetchone()
     cursor.close()
     conn.close()
     return render_template('edit_incident.html', incident=incident)
+
 
 
 
