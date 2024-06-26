@@ -88,6 +88,10 @@ def dashboard():
         # Fetch user role information
         cursor.execute('SELECT role FROM personnel WHERE name = %s', (username,))
         role_info = cursor.fetchone()
+        
+        # Fetch user title information
+        cursor.execute('SELECT title FROM personnel WHERE name = %s', (username,))
+        title = cursor.fetchone()
 
         # Fetch sectors information
         cursor.execute('SELECT id, name FROM sectors')
@@ -107,7 +111,7 @@ def dashboard():
         conn.close()
 
         template_name = f"{role}_dashboard.html"
-        return render_template(template_name, username=username, role=role, incidents=incidents, sectors=sectors)
+        return render_template(template_name, username=username, role=role, incidents=incidents, sectors=sectors, title=title)
     else:
         return redirect(url_for('login'))
 
@@ -366,10 +370,10 @@ def risk_assessment():
     
     # Fetch the count of epidemic incidents per sector
     cursor.execute('''
-        SELECT sector_id, COUNT(*) as count
+        SELECT sector_id, name, COUNT(*) as count
         FROM incidents
         WHERE incident_type = 'epidemic'
-        GROUP BY sector_id
+        GROUP BY name
         ORDER BY count DESC
     ''')
     epidemic_risks = cursor.fetchall()
