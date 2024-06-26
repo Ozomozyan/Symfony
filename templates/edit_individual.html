@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Individual</title>
+</head>
+<body>
+    <h1>Edit Individual</h1>
+    <form method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="{{ individual[1] }}"><br><br>
+        
+        <label for="health_status">Health Status:</label>
+        <select id="health_status" name="health_status">
+            <option value="healthy" {% if individual[3] == 'healthy' %}selected{% endif %}>Healthy</option>
+            <option value="sick" {% if individual[3] == 'sick' %}selected{% endif %}>Sick</option>
+            <option value="critical" {% if individual[3] == 'critical' %}selected{% endif %}>Critical</option>
+        </select><br><br>
+        
+        <label for="is_quarantined">Is Quarantined:</label>
+        <input type="checkbox" id="is_quarantined" name="is_quarantined" {% if individual[4] %}checked{% endif %}><br><br>
+        
+        <input type="submit" value="Save Changes">
+    </form>
+</body>
+</html>

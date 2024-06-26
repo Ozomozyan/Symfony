@@ -200,6 +200,29 @@ def edit_user(user_id):
     conn.close()
     return render_template('edit_user.html', user=user)
 
+@app.route('/admin/edit_individual/<int:individual_id>', methods=['GET', 'POST'])
+@auth.login_required
+@role_required('admin')
+def edit_individual(individual_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        name = request.form['name']
+        health_status = request.form['health_status']
+        is_quarantined = request.form.get('is_quarantined', type=bool)
+        cursor.execute('UPDATE individuals SET name = %s, health_status = %s, is_quarantined = %s WHERE id = %s', 
+                       (name, health_status, is_quarantined, individual_id))
+        conn.commit()
+        return redirect(url_for('list_users'))
+
+    cursor.execute('SELECT * FROM individuals WHERE id = %s', (individual_id,))
+    individual = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return render_template('edit_individual.html', individual=individual)
+
+
 @app.route('/admin/add_resource', methods=['GET', 'POST'])
 @auth.login_required
 @role_required('admin')
