@@ -12,11 +12,11 @@
     <ul>
         {% for incident in incidents %}
             <li>
-                Incident Description: {{ incident['description'] }}<br>
-                Sector ID: {{ incident['sector_id'] }}<br>
-                Type: {{ incident['incident_type'] }}<br>
-                Status: {{ incident['status'] }}<br>
-                <a href="/edit_incident/{{ incident['id'] }}">Edit Incident</a>
+                Incident Description: {{ incident.description }}<br>
+                Sector: {{ incident.sector_id }} - ID: {{ incident.id }}<br>
+                Type: {{ incident.incident_type }}<br>
+                Status: {{ incident.status }}<br>
+                <a href="/edit_incident/{{ incident.id }}">Edit Incident</a>
             </li>
         {% endfor %}
     </ul>
