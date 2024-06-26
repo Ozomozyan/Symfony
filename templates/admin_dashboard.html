@@ -34,8 +34,9 @@
         {% endfor %}
     </ul>
 
-        <!-- Logout Button -->
+        <!-- Logout Button with CSRF token -->
     <form action="{{ url_for('logout') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <button type="submit" class="btn btn-danger">Logout</button>
     </form>
 
