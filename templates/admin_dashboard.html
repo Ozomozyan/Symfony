@@ -7,16 +7,26 @@
 <body>
     <h1>Admin Dashboard</h1>
     <p>Welcome, {{ user }}!</p>
+
+    <!-- Navigation Buttons -->
+    <div>
+        <button onclick="window.location.href='/admin/users'">Manage Users</button>
+        <button onclick="window.location.href='/admin/incidents'">Manage Incidents</button>
+        <button onclick="window.location.href='/admin/resources'">Manage Resources</button>
+        <button onclick="window.location.href='/admin/add_resource'">Add Resource</button>
+    </div>
+
     <h2>Current Incidents</h2>
     <ul>
         {% for incident in incidents %}
-            <li>{{ incident[2] }} - Status: {{ incident[6] }}</li>
+            <li>{{ incident.description }} - Status: {{ incident.status }} - <a href="/admin/edit_incident/{{ incident.id }}">Edit</a></li>
         {% endfor %}
     </ul>
+
     <h2>Resources</h2>
     <ul>
         {% for resource in resources %}
-            <li>{{ resource[1] }}: {{ resource[2] }}</li>
+            <li>{{ resource.type }}: {{ resource.quantity }} - <a href="/admin/edit_resource/{{ resource.id }}">Edit</a></li>
         {% endfor %}
     </ul>
 </body>

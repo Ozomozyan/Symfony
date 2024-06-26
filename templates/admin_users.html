@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Users</title>
+</head>
+<body>
+    <h1>Users Administration</h1>
+    <h2>Personnel</h2>
+    <ul>
+        {% for person in personnel %}
+        <li>{{ person.name }} - {{ person.role }} - <a href="/admin/edit_user/{{ person.id }}">Edit</a></li>
+        {% endfor %}
+    </ul>
+    <h2>Individuals</h2>
+    <ul>
+        {% for individual in individuals %}
+        <li>{{ individual.name }} - {{ individual.health_status }} - <a href="/admin/edit_individual/{{ individual.id }}">Edit</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

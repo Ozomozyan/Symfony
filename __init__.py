@@ -157,28 +157,91 @@ def update_status():
 @role_required('admin')
 def admin_dashboard():
     conn = get_db_connection()
-    if conn is not None:
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM incidents')
+    incidents = cursor.fetchall()
+    cursor.execute('SELECT * FROM resources')
+    resources = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('admin_dashboard.html', user=auth.current_user(), incidents=incidents, resources=resources)
+
+@app.route('/admin/users')
+@auth.login_required
+@role_required('admin')
+def list_users():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM personnel')
+    personnel = cursor.fetchall()
+    cursor.execute('SELECT * FROM individuals')
+    individuals = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('admin_users.html', personnel=personnel, individuals=individuals)
+
+@app.route('/admin/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@auth.login_required
+@role_required('admin')
+def edit_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        name = request.form['name']
+        role = request.form['role']
+        cursor.execute('UPDATE personnel SET name = %s, role = %s WHERE id = %s', (name, role, user_id))
+        conn.commit()
+        return redirect(url_for('list_users'))
+
+    cursor.execute('SELECT * FROM personnel WHERE id = %s', (user_id,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return render_template('edit_user.html', user=user)
+
+@app.route('/admin/add_resource', methods=['GET', 'POST'])
+@auth.login_required
+@role_required('admin')
+def add_resource():
+    if request.method == 'POST':
+        resource_type = request.form['type']
+        quantity = request.form['quantity']
+        sector_id = request.form['sector_id']
+        conn = get_db_connection()
         cursor = conn.cursor()
-        try:
-            cursor.execute('SELECT * FROM incidents')
-            incidents = cursor.fetchall()
-            cursor.execute('SELECT * FROM resources')
-            resources = cursor.fetchall()
+        cursor.execute('INSERT INTO resources (type, quantity, sector_id) VALUES (%s, %s, %s)', (resource_type, quantity, sector_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return redirect(url_for('admin_dashboard'))
+    return render_template('add_resource.html')
 
-            # Debug: Print the fetched data to the console
-            print("Incidents:", incidents)
-            print("Resources:", resources)
+@app.route('/admin/incidents')
+@auth.login_required
+@role_required('admin')
+def manage_incidents():
+    # Fetch incidents from the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM incidents')
+    incidents = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('manage_incidents.html', incidents=incidents)
 
-            cursor.close()
-        except mysql.connector.Error as err:
-            print("Failed to fetch data:", err)
-            return jsonify({"error": "Database query failed"}), 500
-        finally:
-            conn.close()
-        
-        return render_template('admin_dashboard.html', user=session['username'], incidents=incidents, resources=resources)
-    else:
-        return jsonify({"error": "Failed to connect to database"}), 500
+@app.route('/admin/resources')
+@auth.login_required
+@role_required('admin')
+def manage_resources():
+    # Fetch resources from the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM resources')
+    resources = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('manage_resources.html', resources=resources)
 
 
 @app.route('/register', methods=['GET', 'POST'])
